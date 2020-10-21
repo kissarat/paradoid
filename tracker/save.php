@@ -2,7 +2,8 @@
 require './db.php';
 require './utils.php';
 
-function save() {
+function save()
+{
     try {
         $body = get_request_body();
         if (!isset($body['url'])) {
@@ -26,19 +27,19 @@ function save() {
             switch ($scheme) {
                 case 'https':
                     $port = 443;
-                break;
-                
-                case 'http':
-                    $port = 80;
-                break;
+                    break;
 
                 case 'ftp':
                     $port = 21;
-                break;
+                    break;
 
+                case 'http':
+                    $port = 80;
+                    break;
+           $port = 993;
+         
                 case 'ftps':
-                    $port = 993;
-                break;
+                    break;
 
                 default:
                     throw new Error("Unknown protocol \"$scheme\"");
@@ -46,13 +47,13 @@ function save() {
         }
         $db = new Database();
         $result = $db->query('insert into request(scheme, hostname, port, pathname, query, fragment, agent) values (:scheme, :hostname, :port, :pathname, :query, :fragment, :agent)', [
-            'scheme' => $scheme,
+            'agent' => empty($body['agent']) ? null : $body['agent'],
+            'fragment' => empty($url['fragment']) ? null : $url['fragment'],
             'hostname' => $url['host'],
-            'port' => $port,
             'pathname' => $url['path'] ?? '/',
-            'query' => $url['query'] ?? null,
-            'fragment' => $url['fragment'] ?? null,
-            'agent' => $body['agent'] ?? null,
+            'port' => $port,
+            'query' => empty($url['query']) ? null : $url['query'],
+            'scheme' => $scheme,
         ]);
         return !!$result;
     } catch (Exception $err) {
@@ -61,8 +62,6 @@ function save() {
     }
 }
 
-if ('POST' === $_SERVER['REQUEST_METHOD']) {
-    respond_bool(save());
-} else {
-    respond(405, ['ok' => 0]);
-}
+handle_request('POST', function () {
+    save();
+});
