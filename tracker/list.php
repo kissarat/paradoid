@@ -2,7 +2,7 @@
 require './db.php';
 require './utils.php';
 
-function index()
+function find()
 {
     $sort = $_GET['sort'] ?? 'id';
     $columns = ['id', 'scheme', 'hostname', 'port', 'pathname', 'query', 'fragment', 'created_at'];
@@ -33,12 +33,16 @@ function index()
         $r = $c->fetchAll(PDO::FETCH_COLUMN);
         $count = $r[0];
     }
+    $items = $result->fetchAll(PDO::FETCH_ASSOC);
+    foreach($items as $item) {
+        $item['created_at'] = str_replace(' ', 'T', $item['created_at']);
+    }
     respond(200, [
         'count' => $count,
-        'items' => $result->fetchAll(PDO::FETCH_ASSOC)
+        'items' => $items
     ]);
 }
 
 handle_request('GET', function() {
-    index();
+    find();
 });
