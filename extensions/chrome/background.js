@@ -11,19 +11,20 @@ chrome.runtime.onInstalled.addListener(function() {
         if (result.key) {
             agent = result.key;
         } else {
-            chrome.storage.local.set({ agent }, function() {
             agent = createUUID();
-            });
+            chrome.storage.local.set({ agent });
         }
     });
 });
 
-chrome.webNavigation.onCompleted.addListener(async function({ url }) {
-    await fetch('http://paranoid.labiak.org/save.php', {
-        method: 'POST',
-        body: JSON.stringify({ url, agent }),
-        headers: {
-            'content-type': 'application/json'
-        }
-    })
+chrome.webNavigation.onCompleted.addListener(async function({ url, frameId }) {
+    if (0 === frameId) {
+        await fetch('http://paranoid.labiak.org/save.php', {
+            method: 'POST',
+            body: JSON.stringify({ url, agent }),
+            headers: {
+                'content-type': 'application/json'
+            }
+        })
+    }
 });
