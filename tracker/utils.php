@@ -3,8 +3,9 @@
 function respond(int $status = 200, $obj = null)
 {
     http_response_code($status);
-    header('access-control-allow-origin', '*');
-    header('access-control-allow-headers', 'GET, POST, OPTIONS, DELETE');
+    header('access-control-allow-origin: *');
+    header('access-control-allow-methods: GET,POST,OPTIONS,DELETE');
+    header('access-control-allow-headers: content-length,content-type,date,etag,last-modified');
     if (is_string($obj)) {
         $obj = [
             'ok' => 0,
@@ -14,8 +15,8 @@ function respond(int $status = 200, $obj = null)
     if (is_array($obj)) {
         $obj['status'] = $status;
         $body = json_encode($obj, JSON_UNESCAPED_UNICODE, 5);
-        header('content-type', 'application/json');
-        header('content-length', strlen($body));
+        header('content-type: application/json');
+        header('content-length' . strlen($body));
         echo $body;
     }
 }

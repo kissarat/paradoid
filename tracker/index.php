@@ -28,13 +28,13 @@ function index()
         'skip' => $skip,
         'take' => $take
     ]);
-    if ('1' === $count) {
-        $c = $db->query('select count(*) from `request`');
+    if ($count) {
+        $c = $db->query('select count(*) as "count" from `request`');
         $r = $c->fetchAll(PDO::FETCH_COLUMN);
         $count = $r[0];
     }
     respond(200, [
-        'count' => +$count,
+        'count' => $count,
         'items' => $result->fetchAll(PDO::FETCH_ASSOC)
     ]);
 }
