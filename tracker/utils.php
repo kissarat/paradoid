@@ -1,6 +1,6 @@
 <?php
 
-function respond(int $status = 200, $obj)
+function respond(int $status = 200, $obj = null)
 {
     http_response_code($status);
     header('access-control-allow-origin', '*');
@@ -13,7 +13,7 @@ function respond(int $status = 200, $obj)
     }
     if (is_array($obj)) {
         $obj['status'] = $status;
-        $body = json_encode($obj);
+        $body = json_encode($obj, JSON_UNESCAPED_UNICODE, 5);
         header('content-type', 'application/json');
         header('content-length', strlen($body));
         echo $body;
@@ -45,7 +45,7 @@ function handle_request(string $method, callable $handler)
             respond(204);
             break;
         case $method:
-            respond_bool($handler());
+            $handler();;
             break;
         default:
             respond(405, ['ok' => 0]);

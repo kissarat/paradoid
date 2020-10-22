@@ -63,5 +63,5 @@ function save()
 }
 
 handle_request('POST', function () {
-    save();
+    respond_bool(save());
 });
