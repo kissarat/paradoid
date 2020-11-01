@@ -1,0 +1,38 @@
+<!DOCUMENT>
+<html>
+    <head></head>
+    <body>
+        <ul>
+
+        </ul>
+        <script>
+            async function main() {
+                const ul = document.querySelector('ul');
+                const res = await fetch('/list.php');
+                const data = await res.json();
+                const partial = document.createDocumentFragment();
+                for(const item of data.items) {
+                    let port = '';
+                    if ((80 !== item.port && 'http' === item.scheme) || (443 !== item.port && 'https' === item.scheme)) {
+                        port = `:${item.port}`;
+                    }
+                    let query = '';
+                    if (item.query) {
+                        query = `?${item.query}`;
+                    }
+                    let fragment = '';
+                    if (item.fragment) {
+                        fragment = `#${item.fragment}`;
+                    }
+                    const url = `${item.scheme}://${item.hostname}${port}${item.pathname}${query}${fragment}`;
+                    const li = document.createElement('li');
+                    const createdAt = new Date(item.created_at)
+                    li.innerHTML = `<span>${createdAt.toLocaleString()}</span> <a href="${url}">${url}</a>`
+                    partial.appendChild(li);
+                }
+                ul.appendChild(partial);
+            }
+            main();
+        </script>
+    </body>
+</html>
