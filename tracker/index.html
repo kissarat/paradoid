@@ -7,6 +7,10 @@
             body {
                 font-family: 'Ubuntu Mono', monospace;
             }
+
+            li {
+                white-space: nowrap;
+            }
         </style>
     </head>
     <body>
@@ -14,14 +18,34 @@
 
         </ul>
         <script>
-            async function addPage() {
-                const ul = document.querySelector('ul');
-                const res = await fetch('/list.php');
+            const standardPorts = {
+                ftp: 21,
+                http: 80,
+                https: 443,
+            }
+            const ul = document.querySelector('ul');
+            const take = 100;
+            let skiped = 0;
+            let isBusy = false;
+            let isEnd = false;
+
+            async function addPage(skip = 0) {
+                isBusy = true;
+                const res = await fetch(`/list.php?sort=id&order=DESC&take=${take}&skip=${skip}`);
                 const data = await res.json();
+                if ('string' === typeof data.message) {
+                    throw new Error(data.message);
+                }
                 const partial = document.createDocumentFragment();
+                if (!Array.isArray(data.items)) {
+                    throw new Error('No items in response');
+                }
+                if (data.items.length < take) {
+                    window.removeEventListener('scroll', onScrollAddPage);
+                }
                 for(const item of data.items) {
                     let port = '';
-                    if ((80 !== item.port && 'http' === item.scheme) || (443 !== item.port && 'https' === item.scheme)) {
+                    if (standardPorts[item.scheme] !== item.port) {
                         port = `:${item.port}`;
                     }
                     let query = '';
@@ -33,12 +57,25 @@
                         fragment = `#${item.fragment}`;
                     }
                     const url = `${item.scheme}://${item.hostname}${port}${item.pathname}${query}${fragment}`;
+                    const text = `<strong>${item.hostname}${port}</strong>${item.pathname}${query}${fragment}`;
                     const li = document.createElement('li');
-                    li.innerHTML = `<span>${item.created_at}</span> <a href="${url}">${url}</a>`
+                    li.innerHTML = `<span>${item.created_at}</span> <a href="${url}">${text}</a>`
                     partial.appendChild(li);
                 }
                 ul.appendChild(partial);
+                skiped = skip;
+                isBusy = false;
             }
+
+            function onScrollAddPage() {
+                const delta = document.body.scrollHeight - window.scrollY;
+                if (delta > 400 && !isBusy) {
+                    
+                    addPage(skiped + 100);
+                }
+            }
+
+            window.addEventListener('scroll', onScrollAddPage);
             
             addPage();
         </script>
