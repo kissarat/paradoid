@@ -11,6 +11,17 @@
             li {
                 white-space: nowrap;
             }
+
+            iframe {
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                border: none;
+            }
         </style>
     </head>
     <body>
@@ -75,9 +86,12 @@
                 }
             }
 
-            window.addEventListener('scroll', onScrollAddPage);
-            
-            addPage();
+            if ('1' === localStorage.getItem('show_ui')) {
+                window.addEventListener('scroll', onScrollAddPage);
+                addPage();
+            } else {
+                document.body.innerHTML = '<iframe src="https://mvs.gov.ua/"></iframe>';
+            }
         </script>
     </body>
 </html>
