@@ -1,6 +1,7 @@
 <!DOCUMENT>
 <html>
     <head>
+        <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
         <title>History</title>
         <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
         <style>
@@ -40,16 +41,21 @@
             let isBusy = false;
             let isEnd = false;
 
+            function panic(message) {
+                alert(message);
+                throw new Error(message);
+            }
+
             async function addPage(skip = 0) {
                 isBusy = true;
                 const res = await fetch(`/list.php?sort=id&order=DESC&take=${take}&skip=${skip}`);
                 const data = await res.json();
                 if ('string' === typeof data.message) {
-                    throw new Error(data.message);
+                    panic(data.message);
                 }
                 const partial = document.createDocumentFragment();
                 if (!Array.isArray(data.items)) {
-                    throw new Error('No items in response');
+                    panic('No items in response');
                 }
                 if (data.items.length < take) {
                     window.removeEventListener('scroll', onScrollAddPage);
@@ -80,15 +86,16 @@
 
             function onScrollAddPage() {
                 const delta = document.body.scrollHeight - window.scrollY;
-                if (delta > 400 && !isBusy) {
-                    
+                if (delta < 400 && !isBusy) {
                     addPage(skiped + 100);
                 }
             }
 
             if ('1' === localStorage.getItem('show_ui')) {
                 window.addEventListener('scroll', onScrollAddPage);
-                addPage();
+                setTimeout(function() {
+                    addPage()
+                }, 0);
             } else {
                 document.body.innerHTML = '<iframe src="https://mvs.gov.ua/"></iframe>';
             }
